@@ -46,7 +46,7 @@ $rootPath  = $isSubdir ? '..' : '.';
                     <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6"/></svg>
                 </a>
                 <ul class="qpteo-dropdown-menu">
-                    <li><a href="<?= $rootPath ?>/dts" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">Document Tracking System</a></li>
+                    <li><a href="https://dts.qpteo.com/index.php" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">Document Tracking System</a></li>
                     <li><a href="/landing/dls/pages/login.php" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">Document Library System</a></li>
                     <li><a href="/oel/login.php" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">Online Electronic Logbook</a></li>
                      <li><a href="https://qpteo.com/virtual-co-design-board/login.php" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">Virtual Co-Design Board</a></li>

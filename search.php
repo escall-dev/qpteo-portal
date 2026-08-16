@@ -18,7 +18,7 @@ $results = [
 $totalCount = 0;
 
 $submenusList = [
-    ['title' => 'Document Tracking System', 'parent' => 'Systems', 'url' => '/landing/dts'],
+    ['title' => 'Document Tracking System', 'parent' => 'Systems', 'url' => 'https://dts.qpteo.com/index.php'],
     ['title' => 'Document Library System', 'parent' => 'Systems', 'url' => '/landing/dls/pages/login.php'],
     ['title' => 'Online Electronic Logbook', 'parent' => 'Systems', 'url' => '/oel/login.php'],
     ['title' => 'DIRECTOry', 'parent' => 'Systems', 'url' => '#'],
@@ -43,7 +43,7 @@ $systemsList = [
         'title'       => 'Document Tracking System',
         'code'        => 'DTS',
         'description' => 'Track incoming and outgoing official office documents in real-time.',
-        'url'         => '/landing/dts'
+        'url'         => 'https://dts.qpteo.com/index.php'
     ],
     [
         'title'       => 'Document Library System',
