@@ -10,7 +10,7 @@ date_default_timezone_set('Asia/Manila');
 define('PORTAL_DB_HOST', 'localhost');
 define('PORTAL_DB_NAME', 'u227963292_qpteo_portal');
 define('PORTAL_DB_USER', 'u227963292_qpteo_portal');
-define('PORTAL_DB_PASS', 'Qpteoportal1994!');
+define('PORTAL_DB_PASS', 'Qpteoportal1994');
 define('PORTAL_DB_CHARSET', 'utf8mb4');
 
 /**
