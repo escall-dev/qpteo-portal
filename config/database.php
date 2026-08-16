@@ -28,7 +28,7 @@ function getPortalDB(): PDO {
             ]);
         } catch (PDOException $e) {
             error_log("Portal DB Connection Error: " . $e->getMessage());
-            die("Database connection failed. Please contact the administrator.");
+            die("Database connection failed: " . $e->getMessage());
         }
     }
     return $pdo;
