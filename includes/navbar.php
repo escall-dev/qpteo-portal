@@ -48,7 +48,7 @@ $rootPath  = $isSubdir ? '..' : '.';
                 <ul class="qpteo-dropdown-menu">
                     <li><a href="https://dts.qpteo.com/index.php" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">Document Tracking System</a></li>
                     <li><a href="/landing/dls/pages/login.php" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">Document Library System</a></li>
-                    <li><a href="/oel/login.php" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">Online Electronic Logbook</a></li>
+                    <li><a href="https://oel.qpteo.com/login.php" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">Online Electronic Logbook</a></li>
                      <li><a href="https://qpteo.com/virtual-co-design-board/login.php" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">Virtual Co-Design Board</a></li>
                     <li><a href="#" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">DIRECTOry</a></li>
                 </ul>
