@@ -6,7 +6,7 @@
  *   $activeNav — string identifying the active nav item: 'home', 'systems', 'repositories', 'issuances', 'coes'
  */
 $activeNav = $activeNav ?? '';
-$isSubdir  = (basename(dirname($_SERVER['SCRIPT_FILENAME'])) !== 'landing');
+$isSubdir  = !file_exists('includes/navbar.php');
 $rootPath  = $isSubdir ? '..' : '.';
 ?>
 <!-- Shared Portal CSS -->
