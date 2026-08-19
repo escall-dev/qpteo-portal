@@ -18,24 +18,50 @@ CREATE TABLE IF NOT EXISTS `repositories` (
     `title`          VARCHAR(500)   NOT NULL,
     `description`    TEXT           NULL,
     `category`       ENUM(
-                        'presentation',
-                        'concept_paper',
-                        'checklist',
-                        'briefer',
-                        'report',
-                        'minutes',
+                        'presentations',
+                        'concept_papers',
+                        'checklists',
+                        'briefers',
+                        'reports',
                         'session_guides',
-                        'others'
+                        'others',
+                        'accomplishment_reports',
+                        'leave_forms',
+                        'proposals',
+                        'program_completion_reports',
+                        'monitoring_evaluation',
+                        'qpteo_office_meetings',
+                        'execom_meetings',
+                        'other_meetings',
+                        'cmos',
+                        'psgs',
+                        'ppst',
+                        'policies',
+                        'guidelines',
+                        'rite'
                      ) NOT NULL DEFAULT 'others',
     `document_type`  ENUM(
-                        'presentation',
-                        'concept_paper',
-                        'checklist',
-                        'briefer',
-                        'report',
-                        'minutes',
+                        'presentations',
+                        'concept_papers',
+                        'checklists',
+                        'briefers',
+                        'reports',
                         'session_guides',
-                        'others'
+                        'others',
+                        'accomplishment_reports',
+                        'leave_forms',
+                        'proposals',
+                        'program_completion_reports',
+                        'monitoring_evaluation',
+                        'qpteo_office_meetings',
+                        'execom_meetings',
+                        'other_meetings',
+                        'cmos',
+                        'psgs',
+                        'ppst',
+                        'policies',
+                        'guidelines',
+                        'rite'
                      ) NOT NULL DEFAULT 'others',
     `file_type`      ENUM(
                         'slides',
@@ -118,3 +144,17 @@ CREATE TABLE IF NOT EXISTS `admin_users` (
 INSERT INTO `admin_users` (`username`, `password`)
 VALUES ('admin', '$2y$10$k2rUnSByr0bfdL.TbeuEIONJwdBnn1zaVdyjQQJB7cjGj2MYkPgj6')
 ON DUPLICATE KEY UPDATE `username` = `username`;
+
+-- -------------------------------------------------------------
+-- Table: settings
+-- Stores key-value configuration settings for the portal.
+-- -------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `settings` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `setting_key` VARCHAR(100) NOT NULL UNIQUE,
+    `setting_value` TEXT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO `settings` (`setting_key`, `setting_value`) VALUES ('meeting_recordings_url', '#');

@@ -8,9 +8,19 @@
 $activeNav = $activeNav ?? '';
 $isSubdir  = !file_exists('includes/navbar.php');
 $rootPath  = $isSubdir ? '..' : '.';
+
+require_once __DIR__ . '/../config/database.php';
+try {
+    $pdo = getPortalDB();
+    $stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'meeting_recordings_url'");
+    $stmt->execute();
+    $meetingRecordingsUrl = $stmt->fetchColumn() ?: '#';
+} catch (Exception $e) {
+    $meetingRecordingsUrl = '#';
+}
 ?>
 <!-- Shared Portal CSS -->
-<link rel="stylesheet" href="<?= $rootPath ?>/assets/css/portal.css">
+<link rel="stylesheet" href="<?= $rootPath ?>/assets/css/portal.css?v=<?= time() ?>">
 
 <header class="qpteo-navbar">
     <div class="qpteo-navbar-container">
@@ -61,14 +71,57 @@ $rootPath  = $isSubdir ? '..' : '.';
                     <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6"/></svg>
                 </a>
                 <ul class="qpteo-dropdown-menu">
-                    <li><a href="<?= $rootPath ?>/repositories.php?category=presentation" class="qpteo-dropdown-item">Presentation</a></li>
-                    <li><a href="<?= $rootPath ?>/repositories.php?category=concept_paper" class="qpteo-dropdown-item">Concept Paper</a></li>
-                    <li><a href="<?= $rootPath ?>/repositories.php?category=checklist" class="qpteo-dropdown-item">Checklist</a></li>
-                    <li><a href="<?= $rootPath ?>/repositories.php?category=briefer" class="qpteo-dropdown-item">Briefer</a></li>
-                    <li><a href="<?= $rootPath ?>/repositories.php?category=report" class="qpteo-dropdown-item">Report</a></li>
-                    <li><a href="<?= $rootPath ?>/repositories.php?category=minutes" class="qpteo-dropdown-item">Minutes</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=presentations" class="qpteo-dropdown-item">Presentations</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=concept_papers" class="qpteo-dropdown-item">Concept Papers</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=checklists" class="qpteo-dropdown-item">Checklists</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=briefers" class="qpteo-dropdown-item">Briefers</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=reports" class="qpteo-dropdown-item">Reports</a></li>
                     <li><a href="<?= $rootPath ?>/repositories.php?category=session_guides" class="qpteo-dropdown-item">Session Guides</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=accomplishment_reports" class="qpteo-dropdown-item">Accomplishment Reports</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=leave_forms" class="qpteo-dropdown-item">Leave Forms</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=proposals" class="qpteo-dropdown-item">Proposals</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=program_completion_reports" class="qpteo-dropdown-item">Program Completion Reports</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=monitoring_evaluation" class="qpteo-dropdown-item">Monitoring and Evaluation Results</a></li>
                     <li><a href="<?= $rootPath ?>/repositories.php?category=others" class="qpteo-dropdown-item">Others</a></li>
+                </ul>
+            </li>
+
+            <!-- Meetings Dropdown -->
+            <li class="qpteo-nav-item has-dropdown">
+                <a href="#" class="qpteo-nav-link <?= $activeNav === 'meetings' ? 'active' : '' ?>" onclick="return false;">
+                    Meetings
+                    <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6"/></svg>
+                </a>
+                <ul class="qpteo-dropdown-menu">
+                    <!-- Nested Dropdown for Minutes of the Meetings -->
+                    <li class="has-nested-dropdown">
+                        <a href="#" class="qpteo-dropdown-item" onclick="return false;" style="display: flex; justify-content: space-between; align-items: center;">
+                            Minutes of the Meetings
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-left: 0.5rem;"><path d="M9 18l6-6-6-6"/></svg>
+                        </a>
+                        <ul class="qpteo-nested-dropdown-menu">
+                            <li><a href="<?= $rootPath ?>/repositories.php?category=qpteo_office_meetings" class="qpteo-dropdown-item">QPTEO Office Meetings</a></li>
+                            <li><a href="<?= $rootPath ?>/repositories.php?category=execom_meetings" class="qpteo-dropdown-item">ExeCom Meetings</a></li>
+                            <li><a href="<?= $rootPath ?>/repositories.php?category=other_meetings" class="qpteo-dropdown-item">Other Meetings</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="<?= htmlspecialchars($meetingRecordingsUrl) ?>" target="_blank" rel="noopener noreferrer" class="qpteo-dropdown-item">Meeting Recordings</a></li>
+                </ul>
+            </li>
+
+            <!-- References Dropdown -->
+            <li class="qpteo-nav-item has-dropdown">
+                <a href="#" class="qpteo-nav-link <?= $activeNav === 'references' ? 'active' : '' ?>" onclick="return false;">
+                    References
+                    <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6"/></svg>
+                </a>
+                <ul class="qpteo-dropdown-menu">
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=cmos" class="qpteo-dropdown-item">CHED Memorandum Orders (CMOs)</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=psgs" class="qpteo-dropdown-item">Policies, Standards and Guidelines (PSGs)</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=ppst" class="qpteo-dropdown-item">Philippine Professional Standards for Teachers (PPST)</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=policies" class="qpteo-dropdown-item">Policies</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=guidelines" class="qpteo-dropdown-item">Guidelines</a></li>
+                    <li><a href="<?= $rootPath ?>/repositories.php?category=rite" class="qpteo-dropdown-item">Research Initiatives in Teacher Education (RITE)</a></li>
                 </ul>
             </li>
 

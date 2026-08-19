@@ -7,14 +7,27 @@ require_once __DIR__ . '/config/database.php';
 
 // Valid Document Types (Image 1)
 $validDocTypes = [
-    'presentation'   => 'Presentation',
-    'concept_paper'  => 'Concept Paper',
-    'checklist'      => 'Checklist',
-    'briefer'        => 'Briefer',
-    'report'         => 'Report',
-    'minutes'        => 'Minutes',
-    'session_guides' => 'Session Guides',
-    'others'         => 'Others',
+    'presentations'              => 'Presentations',
+    'concept_papers'             => 'Concept Papers',
+    'checklists'                 => 'Checklists',
+    'briefers'                   => 'Briefers',
+    'reports'                    => 'Reports',
+    'session_guides'             => 'Session Guides',
+    'accomplishment_reports'     => 'Accomplishment Reports',
+    'leave_forms'                => 'Leave Forms',
+    'proposals'                  => 'Proposals',
+    'program_completion_reports' => 'Program Completion Reports',
+    'monitoring_evaluation'      => 'Monitoring and Evaluation Results',
+    'qpteo_office_meetings'      => 'QPTEO Office Meetings',
+    'execom_meetings'            => 'ExeCom Meetings',
+    'other_meetings'             => 'Other Meetings',
+    'cmos'                       => 'CHED Memorandum Orders (CMOs)',
+    'psgs'                       => 'Policies, Standards and Guidelines (PSGs)',
+    'ppst'                       => 'Philippine Professional Standards for Teachers (PPST)',
+    'policies'                   => 'Policies',
+    'guidelines'                 => 'Guidelines',
+    'rite'                       => 'Research Initiatives in Teacher Education (RITE)',
+    'others'                     => 'Others',
 ];
 
 // Valid File Types (Image 2) with display labels and CSS badge classes
@@ -178,11 +191,7 @@ if ($search)         $baseParams['search']    = $search;
                 <!-- Document Type Filter Pills -->
                 <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
                     <span style="font-size:0.8rem;font-weight:700;color:var(--portal-navy);text-transform:uppercase;letter-spacing:0.04em;">Document Type:</span>
-                    <?php 
-                        $docParams = $baseParams; 
-                        unset($docParams['category']);
-                    ?>
-                    <a href="repositories.php<?= $docParams ? '?' . http_build_query($docParams) : '' ?>" class="category-pill <?= !$category ? 'active' : '' ?>">All Types</a>
+
                     <?php foreach ($validDocTypes as $key => $label): ?>
                         <?php 
                             $p = array_merge($baseParams, ['category' => $key]);
