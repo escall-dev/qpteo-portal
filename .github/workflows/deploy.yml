@@ -16,6 +16,8 @@ jobs:
           port: ${{ secrets.PORT }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
+          timeout: 120s
+          proxy_timeout: 120s
           script: |
             cd domains/qpteo.com/public_html/portal
             git fetch origin main
