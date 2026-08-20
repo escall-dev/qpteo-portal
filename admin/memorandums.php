@@ -78,24 +78,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($msgType !== 'error') {
                 try {
                     if ($postAction === 'add') {
-                        if ($filePath === '') {
-                            $msg = 'Please upload a memorandum file.';
-                            $msgType = 'error';
-                        } else {
-                            $stmt = $pdo->prepare("INSERT INTO memorandums (memo_number, subject, description, date_issued, file_path, issued_by, file_size) VALUES (:mnum, :subj, :desc, :di, :fpath, :iby, :fsize)");
-                            $stmt->execute([
-                                ':mnum'  => $memo_number,
-                                ':subj'  => $subject,
-                                ':desc'  => $description,
-                                ':di'    => $date_issued,
-                                ':fpath' => $filePath,
-                                ':iby'   => $issued_by,
-                                ':fsize' => $fileSize,
-                            ]);
-                            $msg = 'Memorandum added successfully.';
-                            $msgType = 'success';
-                            $action = 'list';
-                        }
+                        $stmt = $pdo->prepare("INSERT INTO memorandums (memo_number, subject, description, date_issued, file_path, issued_by, file_size) VALUES (:mnum, :subj, :desc, :di, :fpath, :iby, :fsize)");
+                        $stmt->execute([
+                            ':mnum'  => $memo_number,
+                            ':subj'  => $subject,
+                            ':desc'  => $description,
+                            ':di'    => $date_issued,
+                            ':fpath' => $filePath,
+                            ':iby'   => $issued_by,
+                            ':fsize' => $fileSize,
+                        ]);
+                        $msg = 'Memorandum added successfully.';
+                        $msgType = 'success';
+                        $action = 'list';
                     } elseif ($postAction === 'edit' && $editId > 0) {
                         if ($filePath !== '') {
                             $stmt = $pdo->prepare("UPDATE memorandums SET memo_number=:mnum, subject=:subj, description=:desc, date_issued=:di, file_path=:fpath, issued_by=:iby, file_size=:fsize WHERE id=:id");
@@ -322,7 +317,7 @@ function formatFileSize($bytes) {
 
                             <!-- Single File Input -->
                             <div id="section_memo_file" class="admin-form-group" style="<?= preg_match('/^https?:\/\//i', $editRecord['file_path'] ?? '') ? 'display:none;' : '' ?>">
-                                <label for="memo_file">Memorandum File <?= $action === 'add' ? '<span class="required">*</span>' : '(leave empty to keep current)' ?></label>
+                                <label for="memo_file">Memorandum File <small style="font-weight:normal;color:var(--admin-text-muted)">(Optional)</small></label>
                                 <input type="file" id="memo_file" name="memo_file">
                                 <p class="file-info">Max 100MB. Allowed: Documents, Spreadsheets, PDF, Videos, Audio, Images, ZIP</p>
                             </div>

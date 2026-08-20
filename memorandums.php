@@ -163,12 +163,14 @@ if ($search) $baseParams['search'] = $search;
                         </thead>
                         <tbody>
                             <?php foreach ($records as $row): 
+                                $isEmpty = empty($row['file_path']);
                                 $isExternal = preg_match('/^https?:\/\//i', $row['file_path']);
                                 $pubUrl     = $isExternal ? $row['file_path'] : ltrim($row['file_path'], '/');
                                 $ext        = strtolower(pathinfo(parse_url($pubUrl, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
                                 
                                 $previewType = 'pdf';
-                                if ($ext === 'pdf') $previewType = 'pdf';
+                                if ($isEmpty) $previewType = 'empty';
+                                elseif ($ext === 'pdf') $previewType = 'pdf';
                                 elseif (in_array($ext, ['ppt', 'pptx'])) $previewType = 'slides';
                                 elseif (in_array($ext, ['doc', 'docx'])) $previewType = 'docs';
                                 elseif (in_array($ext, ['xls', 'xlsx', 'csv'])) $previewType = 'sheets';
@@ -195,20 +197,31 @@ if ($search) $baseParams['search'] = $search;
                                                 Preview
                                             </button>
 
-                                            <a href="<?= htmlspecialchars($pubUrl) ?>" class="download-btn" target="_blank" <?= ($isExternal) ? '' : 'download' ?> title="<?= $isExternal ? 'Open Link' : 'Download File' ?>">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <?php if ($isExternal): ?>
-                                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                                        <polyline points="15 3 21 3 21 9"></polyline>
-                                                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                                                    <?php else: ?>
+                                            <?php if (!$isEmpty): ?>
+                                                <a href="<?= htmlspecialchars($pubUrl) ?>" class="download-btn" target="_blank" <?= ($isExternal) ? '' : 'download' ?> title="<?= $isExternal ? 'Open Link' : 'Download File' ?>">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <?php if ($isExternal): ?>
+                                                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                                            <polyline points="15 3 21 3 21 9"></polyline>
+                                                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                                                        <?php else: ?>
+                                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                            <polyline points="7 10 12 15 17 10"></polyline>
+                                                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                                                        <?php endif; ?>
+                                                    </svg>
+                                                    <?= $isExternal ? 'Open Link' : 'Download' ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <span class="download-btn" style="opacity:0.5; cursor:not-allowed;" title="No File Attached">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                                         <polyline points="7 10 12 15 17 10"></polyline>
                                                         <line x1="12" y1="15" x2="12" y2="3"></line>
-                                                    <?php endif; ?>
-                                                </svg>
-                                                <?= $isExternal ? 'Open Link' : 'Download' ?>
-                                            </a>
+                                                    </svg>
+                                                    Download
+                                                </span>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
@@ -296,6 +309,7 @@ if ($search) $baseParams['search'] = $search;
 
             modalTitle.textContent = title || 'Memorandum Preview';
             modalDl.href = url;
+            modalDl.style.display = 'inline-flex';
 
             let isExternal = /^https?:\/\//i.test(url);
             let embedUrl = url;
@@ -310,6 +324,14 @@ if ($search) $baseParams['search'] = $search;
 
             if (type === 'pdf') {
                 modalBody.innerHTML = `<iframe src="${embedUrl}#toolbar=1" style="width:100%;height:100%;min-height:500px;border:none;"></iframe>`;
+            } else if (type === 'empty') {
+                modalBody.innerHTML = `
+                    <div class="doc-preview-card" style="padding: 3rem; text-align: center;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" style="width: 48px; height: 48px; margin-bottom: 1rem;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                        <h4 style="font-size:1.15rem;font-weight:700;margin-bottom:0.4rem;color:#374151;">No File Attached</h4>
+                        <p style="color:#6b7280;font-size:0.88rem;">This memorandum was posted without an attached file.</p>
+                    </div>`;
+                modalDl.style.display = 'none';
             } else if (isExternal) {
                 modalBody.innerHTML = `<iframe src="${embedUrl}" style="width:100%;height:100%;min-height:500px;border:none;"></iframe>`;
             } else {
