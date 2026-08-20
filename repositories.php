@@ -431,6 +431,14 @@ if ($search)         $baseParams['search']    = $search;
                     </svg>
                     <h3>No documents found</h3>
                     <p>There are no documents matching your selection. Try selecting another document type or clearing filters.</p>
+                    <?php if (!empty($search) || !empty($category) || !empty($fileTypeFilter)): ?>
+                        <div style="margin-top: 1rem;">
+                            <a href="repositories.php" class="portal-btn portal-btn-outline" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 1rem; font-size: 0.85rem;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                Clear all filters
+                            </a>
+                        </div>
+                    <?php endif; ?>
                 </div>
             <?php else: ?>
                 
@@ -442,8 +450,11 @@ if ($search)         $baseParams['search']    = $search;
                             <span>Documents (<?= $totalRecords ?>)</span>
                         </div>
                         <div class="repo-mobile-search-bar">
-                            <input type="text" id="repoSearchMobile" placeholder="Search..." value="<?= htmlspecialchars($search) ?>" onkeydown="if(event.key==='Enter')applySearchMobile()">
-                            <button type="button" onclick="applySearchMobile()" aria-label="Search">
+                            <input type="text" id="repoSearchMobile" placeholder="Search..." value="<?= htmlspecialchars($search) ?>" onkeydown="if(event.key==='Enter')applySearchMobile()" oninput="toggleMobileSearchClear()">
+                            <button type="button" id="repoSearchMobileClear" class="repo-mobile-search-clear" onclick="clearSearchMobile()" aria-label="Clear search" style="<?= empty($search) ? 'display: none;' : '' ?>">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                            <button type="button" class="repo-mobile-search-submit" onclick="applySearchMobile()" aria-label="Search">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
                             </button>
                         </div>
@@ -568,7 +579,10 @@ if ($search)         $baseParams['search']    = $search;
                                 <circle cx="11" cy="11" r="8"></circle>
                                 <path d="m21 21-4.35-4.35"></path>
                             </svg>
-                            <input type="text" id="repoSearch" placeholder="Search documents..." value="<?= htmlspecialchars($search) ?>" onkeydown="if(event.key==='Enter')applySearch()">
+                            <input type="text" id="repoSearch" placeholder="Search documents..." value="<?= htmlspecialchars($search) ?>" onkeydown="if(event.key==='Enter')applySearch()" oninput="toggleDesktopSearchClear()">
+                            <button type="button" id="repoSearchClear" class="portal-search-clear" onclick="clearSearchDesktop()" aria-label="Clear search" style="<?= empty($search) ? 'display: none;' : '' ?>">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
                         </div>
                         <div class="portal-table-info">
                             Showing <?= $offset + 1 ?>–<?= min($offset + $limit, $totalRecords) ?> of <?= $totalRecords ?> document<?= $totalRecords !== 1 ? 's' : '' ?>
@@ -756,7 +770,8 @@ if ($search)         $baseParams['search']    = $search;
         }
 
         function applySearch() {
-            const val = document.getElementById('repoSearch').value.trim();
+            const input = document.getElementById('repoSearch');
+            const val = input ? input.value.trim() : '';
             const url = new URL(window.location.origin + window.location.pathname);
             if (currentCategory) url.searchParams.set('category', currentCategory);
             if (currentFileType) url.searchParams.set('file_type', currentFileType);
@@ -766,13 +781,56 @@ if ($search)         $baseParams['search']    = $search;
         }
 
         function applySearchMobile() {
-            const val = document.getElementById('repoSearchMobile').value.trim();
+            const input = document.getElementById('repoSearchMobile');
+            const val = input ? input.value.trim() : '';
             const url = new URL(window.location.origin + window.location.pathname);
             if (currentCategory) url.searchParams.set('category', currentCategory);
             if (currentFileType) url.searchParams.set('file_type', currentFileType);
             if (val) url.searchParams.set('search', val);
 
             window.location.href = url.toString();
+        }
+
+        function toggleMobileSearchClear() {
+            const input = document.getElementById('repoSearchMobile');
+            const clearBtn = document.getElementById('repoSearchMobileClear');
+            if (input && clearBtn) {
+                clearBtn.style.display = input.value.trim().length > 0 ? 'flex' : 'none';
+            }
+        }
+
+        function clearSearchMobile() {
+            const input = document.getElementById('repoSearchMobile');
+            if (!input) return;
+            const hadSearch = new URLSearchParams(window.location.search).has('search');
+            input.value = '';
+            toggleMobileSearchClear();
+            if (hadSearch) {
+                applySearchMobile();
+            } else {
+                input.focus();
+            }
+        }
+
+        function toggleDesktopSearchClear() {
+            const input = document.getElementById('repoSearch');
+            const clearBtn = document.getElementById('repoSearchClear');
+            if (input && clearBtn) {
+                clearBtn.style.display = input.value.trim().length > 0 ? 'flex' : 'none';
+            }
+        }
+
+        function clearSearchDesktop() {
+            const input = document.getElementById('repoSearch');
+            if (!input) return;
+            const hadSearch = new URLSearchParams(window.location.search).has('search');
+            input.value = '';
+            toggleDesktopSearchClear();
+            if (hadSearch) {
+                applySearch();
+            } else {
+                input.focus();
+            }
         }
 
         function openMediaModal(url, title, type, docTypeLabel, fileTypeLabel) {

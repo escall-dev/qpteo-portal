@@ -548,7 +548,7 @@ body {
 
 .portal-search-box input {
     width: 100%;
-    padding: 0.6rem 1rem 0.6rem 2.75rem;
+    padding: 0.6rem 2.2rem 0.6rem 2.75rem;
     border: 1.5px solid var(--portal-border);
     border-radius: var(--portal-radius-sm);
     font-family: var(--font-sans);
@@ -574,6 +574,31 @@ body {
     height: 18px;
     color: var(--portal-text-muted);
     pointer-events: none;
+}
+
+.portal-search-box .portal-search-clear {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    background: #e2e8f0;
+    border: none;
+    border-radius: 50%;
+    color: #475569;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.portal-search-box .portal-search-clear:hover,
+.portal-search-box .portal-search-clear:active {
+    background: #cbd5e1;
+    color: #0f172a;
 }
 
 .portal-table-info {
