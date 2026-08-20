@@ -120,6 +120,7 @@ CREATE TABLE IF NOT EXISTS `centers_of_excellence` (
     `description`      TEXT         NULL,
     `logo_path`        VARCHAR(1000) NULL,
     `doc_link`         VARCHAR(1000) NULL,
+    `social_media_link` VARCHAR(1000) NULL,
     `created_at`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 

@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $contact_info     = trim($_POST['contact_info'] ?? '');
         $description      = trim($_POST['description'] ?? '');
         $doc_link         = trim($_POST['doc_link'] ?? '');
+        $social_media_link = trim($_POST['social_media_link'] ?? '');
         $editId           = (int)($_POST['edit_id'] ?? 0);
 
         if ($institution_name === '') {
@@ -63,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($msgType !== 'error') {
                 try {
                     if ($postAction === 'add') {
-                        $stmt = $pdo->prepare("INSERT INTO centers_of_excellence (institution_name, region, province, address, designation_date, status, contact_info, description, logo_path, doc_link) VALUES (:name, :region, :prov, :addr, :ddate, :status, :contact, :desc, :logo, :dlink)");
+                        $stmt = $pdo->prepare("INSERT INTO centers_of_excellence (institution_name, region, province, address, designation_date, status, contact_info, description, logo_path, doc_link, social_media_link) VALUES (:name, :region, :prov, :addr, :ddate, :status, :contact, :desc, :logo, :dlink, :smlink)");
                         $stmt->execute([
                             ':name'    => $institution_name,
                             ':region'  => $region,
@@ -75,13 +76,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             ':desc'    => $description,
                             ':logo'    => $logoPath ?: null,
                             ':dlink'   => $doc_link ?: null,
+                            ':smlink'  => $social_media_link ?: null,
                         ]);
                         $msg = 'Institution added successfully.';
                         $msgType = 'success';
                         $action = 'list';
                     } elseif ($postAction === 'edit' && $editId > 0) {
                         if ($logoPath !== '') {
-                            $stmt = $pdo->prepare("UPDATE centers_of_excellence SET institution_name=:name, region=:region, province=:prov, address=:addr, designation_date=:ddate, status=:status, contact_info=:contact, description=:desc, logo_path=:logo, doc_link=:dlink WHERE id=:id");
+                            $stmt = $pdo->prepare("UPDATE centers_of_excellence SET institution_name=:name, region=:region, province=:prov, address=:addr, designation_date=:ddate, status=:status, contact_info=:contact, description=:desc, logo_path=:logo, doc_link=:dlink, social_media_link=:smlink WHERE id=:id");
                             $stmt->execute([
                                 ':name'    => $institution_name,
                                 ':region'  => $region,
@@ -93,10 +95,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 ':desc'    => $description,
                                 ':logo'    => $logoPath,
                                 ':dlink'   => $doc_link ?: null,
+                                ':smlink'  => $social_media_link ?: null,
                                 ':id'      => $editId,
                             ]);
                         } else {
-                            $stmt = $pdo->prepare("UPDATE centers_of_excellence SET institution_name=:name, region=:region, province=:prov, address=:addr, designation_date=:ddate, status=:status, contact_info=:contact, description=:desc, doc_link=:dlink WHERE id=:id");
+                            $stmt = $pdo->prepare("UPDATE centers_of_excellence SET institution_name=:name, region=:region, province=:prov, address=:addr, designation_date=:ddate, status=:status, contact_info=:contact, description=:desc, doc_link=:dlink, social_media_link=:smlink WHERE id=:id");
                             $stmt->execute([
                                 ':name'    => $institution_name,
                                 ':region'  => $region,
@@ -107,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 ':contact' => $contact_info,
                                 ':desc'    => $description,
                                 ':dlink'   => $doc_link ?: null,
+                                ':smlink'  => $social_media_link ?: null,
                                 ':id'      => $editId,
                             ]);
                         }
@@ -311,9 +315,15 @@ if ($action === 'list') {
                             </div>
 
                             <div class="admin-form-group">
-                                <label for="doc_link">Document / Website Link <small style="font-weight:normal;color:var(--admin-text-muted)">(e.g. Google Drive Brochure, Website, Official Document URL)</small></label>
-                                <input type="url" id="doc_link" name="doc_link" placeholder="https://drive.google.com/... or https://example.edu.ph" value="<?= htmlspecialchars($editRecord['doc_link'] ?? $_POST['doc_link'] ?? '') ?>">
-                                <p class="file-info">Add a link so users can preview and view official institution documents or website links.</p>
+                                <label for="doc_link">Website Link <small style="font-weight:normal;color:var(--admin-text-muted)">(Official institution website URL)</small></label>
+                                <input type="url" id="doc_link" name="doc_link" placeholder="https://example.edu.ph" value="<?= htmlspecialchars($editRecord['doc_link'] ?? $_POST['doc_link'] ?? '') ?>">
+                                <p class="file-info">The official website link shown on the public COEs page.</p>
+                            </div>
+
+                            <div class="admin-form-group">
+                                <label for="social_media_link">Social Media Link <small style="font-weight:normal;color:var(--admin-text-muted)">(Facebook, Twitter/X, Instagram, etc.)</small></label>
+                                <input type="url" id="social_media_link" name="social_media_link" placeholder="https://facebook.com/..." value="<?= htmlspecialchars($editRecord['social_media_link'] ?? $_POST['social_media_link'] ?? '') ?>">
+                                <p class="file-info">Social media page link shown on the public COEs page.</p>
                             </div>
 
                             <div class="admin-form-group">
