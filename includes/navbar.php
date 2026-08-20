@@ -21,6 +21,8 @@ try {
 ?>
 <!-- Shared Portal CSS -->
 <link rel="stylesheet" href="<?= $rootPath ?>/assets/css/portal.css?v=<?= time() ?>">
+<!-- Dedicated Mobile Stylesheet -->
+<link rel="stylesheet" href="<?= $rootPath ?>/assets/mobile/mobile.css?v=<?= time() ?>">
 
 <header class="qpteo-navbar">
     <div class="qpteo-navbar-container">

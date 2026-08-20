@@ -15,27 +15,37 @@
 
         <!-- Centered Hero Carousel Container -->
         <div class="qpteo-carousel-wrapper">
-            <div class="qpteo-carousel" id="qpteoHeroCarousel">
-                <div class="qpteo-carousel-inner" id="qpteoCarouselInner">
-                    <div class="qpteo-carousel-slide">
-                        <img src="imgs/COE-Onboarding.jpg" alt="COE Onboarding">
+            <div class="qpteo-carousel-card">
+                <div class="qpteo-carousel" id="qpteoHeroCarousel">
+                    <div class="qpteo-carousel-inner" id="qpteoCarouselInner">
+                        <div class="qpteo-carousel-slide">
+                            <img src="imgs/COE-Onboarding.jpg" alt="COE Onboarding 2026">
+                            <div class="qpteo-slide-caption">
+                                <h3 class="qpteo-slide-title">COE Onboarding 2026</h3>
+                                <p class="qpteo-slide-desc">Orientation & capacity building for Centers of Excellence</p>
+                            </div>
+                        </div>
+                        <div class="qpteo-carousel-slide">
+                            <img src="imgs/JETMC-1.jpg" alt="JETMC Event">
+                            <div class="qpteo-slide-caption">
+                                <h3 class="qpteo-slide-title">Joint Education & Training Mission</h3>
+                                <p class="qpteo-slide-desc">Strengthening teacher education programs and institutional linkages</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="qpteo-carousel-slide">
-                        <img src="imgs/JETMC-1.jpg" alt="JETMC Event">
-                    </div>
-                </div>
 
-                <!-- Controls -->
-                <button class="qpteo-carousel-btn prev" id="carouselPrevBtn" aria-label="Previous Slide">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="20" height="20">
-                        <path d="M15 18l-6-6 6-6"/>
-                    </svg>
-                </button>
-                <button class="qpteo-carousel-btn next" id="carouselNextBtn" aria-label="Next Slide">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="20" height="20">
-                        <path d="M9 18l6-6-6-6"/>
-                    </svg>
-                </button>
+                    <!-- Controls -->
+                    <button class="qpteo-carousel-btn prev" id="carouselPrevBtn" aria-label="Previous Slide">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="20" height="20">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    <button class="qpteo-carousel-btn next" id="carouselNextBtn" aria-label="Next Slide">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="20" height="20">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <!-- Dots Indicators Below Carousel Frame -->
@@ -44,6 +54,12 @@
                 <span class="qpteo-carousel-dot" data-index="1"></span>
             </div>
         </div>
+
+        <!-- Mobile Quick Actions Row -->
+        <?php include 'includes/mobile/quick_actions.php'; ?>
+
+        <!-- Mobile Recent Content Feed -->
+        <?php include 'includes/mobile/recent_feed.php'; ?>
 
     </main>
 
@@ -101,6 +117,35 @@
                 startAutoplay();
             });
         });
+
+        // Touch Swipe Support for Mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const carouselEl = document.getElementById('qpteoHeroCarousel');
+
+        if (carouselEl) {
+            carouselEl.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+                stopAutoplay();
+            }, { passive: true });
+
+            carouselEl.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+                startAutoplay();
+            }, { passive: true });
+        }
+
+        function handleSwipe() {
+            const diff = touchEndX - touchStartX;
+            if (Math.abs(diff) > 40) {
+                if (diff < 0) {
+                    updateSlide(currentIndex + 1); // Swipe left -> Next
+                } else {
+                    updateSlide(currentIndex - 1); // Swipe right -> Prev
+                }
+            }
+        }
 
         startAutoplay();
     });

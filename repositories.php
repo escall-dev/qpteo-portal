@@ -5,13 +5,13 @@
  */
 require_once __DIR__ . '/config/database.php';
 
-// Valid Document Types (Image 1)
+// Valid Document Types — Sorted by frequency of use
 $validDocTypes = [
     'presentations'              => 'Presentations',
-    'concept_papers'             => 'Concept Papers',
-    'checklists'                 => 'Checklists',
-    'briefers'                   => 'Briefers',
     'reports'                    => 'Reports',
+    'checklists'                 => 'Checklists',
+    'concept_papers'             => 'Concept Papers',
+    'briefers'                   => 'Briefers',
     'session_guides'             => 'Session Guides',
     'accomplishment_reports'     => 'Accomplishment Reports',
     'leave_forms'                => 'Leave Forms',
@@ -30,14 +30,14 @@ $validDocTypes = [
     'others'                     => 'Others',
 ];
 
-// Valid File Types (Image 2) with display labels and CSS badge classes
+// Valid File Types with display labels, icon keys, and CSS badge classes
 $validFileTypes = [
-    'slides' => ['label' => 'Slides', 'class' => 'file-badge-slides'],
-    'docs'   => ['label' => 'Docs',   'class' => 'file-badge-docs'],
-    'sheets' => ['label' => 'Sheets', 'class' => 'file-badge-sheets'],
-    'folder' => ['label' => 'Folder', 'class' => 'file-badge-folder'],
-    'pdf'    => ['label' => 'PDF',    'class' => 'file-badge-pdf'],
-    'others' => ['label' => 'Others', 'class' => 'file-badge-others'],
+    'pdf'    => ['label' => 'PDF',    'icon' => 'pdf',    'class' => 'file-badge-pdf'],
+    'docs'   => ['label' => 'DOCX',   'icon' => 'docs',   'class' => 'file-badge-docs'],
+    'sheets' => ['label' => 'XLSX',   'icon' => 'sheets', 'class' => 'file-badge-sheets'],
+    'slides' => ['label' => 'PPTX',   'icon' => 'slides', 'class' => 'file-badge-slides'],
+    'folder' => ['label' => 'Folder', 'icon' => 'folder', 'class' => 'file-badge-folder'],
+    'others' => ['label' => 'Others', 'icon' => 'others', 'class' => 'file-badge-others'],
 ];
 
 // Backward compatibility alias for category
@@ -60,8 +60,36 @@ $allowedSorts = ['title', 'date_uploaded', 'file_size', 'document_type', 'file_t
 $sortCol = in_array($_GET['sort'] ?? '', $allowedSorts) ? $_GET['sort'] : 'date_uploaded';
 $sortDir = (strtolower($_GET['dir'] ?? '') === 'asc') ? 'ASC' : 'DESC';
 
+// Counts initialization
+$docCounts = array_fill_keys(array_keys($validDocTypes), 0);
+$fileTypeCounts = array_fill_keys(array_keys($validFileTypes), 0);
+$totalAllDocs = 0;
+
 try {
     $pdo = getPortalDB();
+
+    // Fetch counts per Document Type
+    $docCountStmt = $pdo->query("SELECT COALESCE(NULLIF(document_type, ''), category) AS doc_key, COUNT(*) AS cnt FROM repositories GROUP BY doc_key");
+    if ($docCountStmt) {
+        while ($row = $docCountStmt->fetch(PDO::FETCH_ASSOC)) {
+            $dk = $row['doc_key'];
+            if (isset($docCounts[$dk])) {
+                $docCounts[$dk] = (int)$row['cnt'];
+            }
+            $totalAllDocs += (int)$row['cnt'];
+        }
+    }
+
+    // Fetch counts per File Type
+    $fCountStmt = $pdo->query("SELECT file_type, COUNT(*) AS cnt FROM repositories GROUP BY file_type");
+    if ($fCountStmt) {
+        while ($row = $fCountStmt->fetch(PDO::FETCH_ASSOC)) {
+            $fk = $row['file_type'];
+            if (isset($fileTypeCounts[$fk])) {
+                $fileTypeCounts[$fk] = (int)$row['cnt'];
+            }
+        }
+    }
 
     // Build query
     $where  = [];
@@ -112,6 +140,30 @@ try {
     $totalPages   = 1;
 }
 
+// Group active categories (count > 0) and zero-count categories
+$activeDocTypes = [];
+$emptyDocTypes = [];
+foreach ($validDocTypes as $k => $label) {
+    $c = $docCounts[$k] ?? 0;
+    if ($c > 0) {
+        $activeDocTypes[$k] = $label;
+    } else {
+        $emptyDocTypes[$k] = $label;
+    }
+}
+
+// Group active file types (count > 0) and zero-count file types
+$activeFileTypes = [];
+$emptyFileTypes = [];
+foreach ($validFileTypes as $k => $meta) {
+    $c = $fileTypeCounts[$k] ?? 0;
+    if ($c > 0) {
+        $activeFileTypes[$k] = $meta;
+    } else {
+        $emptyFileTypes[$k] = $meta;
+    }
+}
+
 // Helper: format file size
 function formatFileSize($bytes) {
     if ($bytes === null || $bytes == 0) return '—';
@@ -141,6 +193,24 @@ function sortIcon($col, $currentSort, $currentDir) {
         return '<svg class="sort-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 14l5-5 5 5"/></svg>';
     }
     return '<svg class="sort-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 10l5 5 5-5"/></svg>';
+}
+
+// Helper: File type SVG icon
+function getFileBadgeIcon($fileTypeKey, $size = 14) {
+    switch ($fileTypeKey) {
+        case 'pdf':
+            return '<svg width="'.$size.'" height="'.$size.'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>';
+        case 'docs':
+            return '<svg width="'.$size.'" height="'.$size.'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>';
+        case 'sheets':
+            return '<svg width="'.$size.'" height="'.$size.'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><line x1="12" y1="9" x2="12" y2="21"></line></svg>';
+        case 'slides':
+            return '<svg width="'.$size.'" height="'.$size.'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>';
+        case 'folder':
+            return '<svg width="'.$size.'" height="'.$size.'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
+        default:
+            return '<svg width="'.$size.'" height="'.$size.'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>';
+    }
 }
 
 $pageTitle = $categoryLabel ? "Repositories — {$categoryLabel}" : "All Repositories";
@@ -181,47 +251,73 @@ if ($search)         $baseParams['search']    = $search;
             </nav>
 
             <!-- Section Header -->
-            <div class="portal-section-header">
+            <div class="portal-section-header repo-section-header">
                 <h1 class="portal-section-title"><?= htmlspecialchars($pageTitle) ?></h1>
-                <p class="portal-section-subtitle">Browse and download official QPTEO documents by Document Type and File Type.</p>
+                <p class="portal-section-subtitle">Browse documents by type.</p>
             </div>
 
-            <!-- Filter Section: Document Types & File Types -->
-            <div style="margin-bottom:1.5rem;display:flex;flex-direction:column;gap:0.75rem;">
-                <!-- Document Type Filter Pills -->
-                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-                    <span style="font-size:0.8rem;font-weight:700;color:var(--portal-navy);text-transform:uppercase;letter-spacing:0.04em;">Document Type:</span>
-
-                    <?php foreach ($validDocTypes as $key => $label): ?>
-                        <?php 
-                            $p = array_merge($baseParams, ['category' => $key]);
-                        ?>
-                        <a href="repositories.php?<?= http_build_query($p) ?>" class="category-pill <?= $category === $key ? 'active' : '' ?>">
-                            <?= htmlspecialchars($label) ?>
-                        </a>
-                    <?php endforeach; ?>
+            <!-- Single Row Dual-Dropdown Filter Bar -->
+            <div class="repo-filter-row">
+                <div class="repo-select-wrapper">
+                    <label for="filterDocType" class="repo-select-label-sr">Document Type</label>
+                    <select id="filterDocType" class="repo-filter-select" onchange="handleFilterChange()">
+                        <option value="" <?= empty($category) ? 'selected' : '' ?>>Document Type (<?= $totalAllDocs ?>)</option>
+                        <?php if (!empty($activeDocTypes)): ?>
+                            <optgroup label="Available Documents">
+                                <?php foreach ($activeDocTypes as $key => $label): ?>
+                                    <option value="<?= htmlspecialchars($key) ?>" <?= $category === $key ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($label) ?> (<?= $docCounts[$key] ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </optgroup>
+                        <?php endif; ?>
+                        <?php if (!empty($emptyDocTypes)): ?>
+                            <optgroup label="Other Categories">
+                                <?php foreach ($emptyDocTypes as $key => $label): ?>
+                                    <option value="<?= htmlspecialchars($key) ?>" <?= $category === $key ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($label) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </optgroup>
+                        <?php endif; ?>
+                    </select>
+                    <svg class="repo-select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
                 </div>
 
-                <!-- File Type Filter Badges (Image 2 Palette) -->
-                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-                    <span style="font-size:0.8rem;font-weight:700;color:var(--portal-navy);text-transform:uppercase;letter-spacing:0.04em;">File Format:</span>
-                    <?php 
-                        $ftParams = $baseParams; 
-                        unset($ftParams['file_type']);
-                    ?>
-                    <a href="repositories.php<?= $ftParams ? '?' . http_build_query($ftParams) : '' ?>" class="file-badge <?= !$fileTypeFilter ? 'file-badge-others' : '' ?>" style="text-decoration:none; opacity: <?= !$fileTypeFilter ? '1' : '0.6' ?>;">All Formats</a>
-                    <?php foreach ($validFileTypes as $fKey => $fMeta): ?>
-                        <?php 
-                            $p = array_merge($baseParams, ['file_type' => $fKey]);
-                            $isActive = ($fileTypeFilter === $fKey);
-                        ?>
-                        <a href="repositories.php?<?= http_build_query($p) ?>" class="file-badge <?= $fMeta['class'] ?>" style="text-decoration:none; transform: <?= $isActive ? 'scale(1.08)' : 'scale(1)' ?>; box-shadow: <?= $isActive ? '0 2px 6px rgba(0,0,0,0.15)' : 'none' ?>; outline: <?= $isActive ? '2px solid var(--portal-navy)' : 'none' ?>;">
-                            <?= htmlspecialchars($fMeta['label']) ?>
-                        </a>
-                    <?php endforeach; ?>
+                <div class="repo-select-wrapper">
+                    <label for="filterFileType" class="repo-select-label-sr">File Format</label>
+                    <select id="filterFileType" class="repo-filter-select" onchange="handleFilterChange()">
+                        <option value="" <?= empty($fileTypeFilter) ? 'selected' : '' ?>>File Type (<?= $totalAllDocs ?>)</option>
+                        <?php if (!empty($activeFileTypes)): ?>
+                            <optgroup label="Available Formats">
+                                <?php foreach ($activeFileTypes as $fKey => $fMeta): ?>
+                                    <option value="<?= htmlspecialchars($fKey) ?>" <?= $fileTypeFilter === $fKey ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($fMeta['label']) ?> (<?= $fileTypeCounts[$fKey] ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </optgroup>
+                        <?php endif; ?>
+                        <?php if (!empty($emptyFileTypes)): ?>
+                            <optgroup label="Other Formats">
+                                <?php foreach ($emptyFileTypes as $fKey => $fMeta): ?>
+                                    <option value="<?= htmlspecialchars($fKey) ?>" <?= $fileTypeFilter === $fKey ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($fMeta['label']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </optgroup>
+                        <?php endif; ?>
+                    </select>
+                    <svg class="repo-select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
                 </div>
+
+                <?php if ($category || $fileTypeFilter): ?>
+                    <a href="repositories.php<?= $search ? '?search=' . urlencode($search) : '' ?>" class="repo-reset-btn" title="Reset filters">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </a>
+                <?php endif; ?>
             </div>
 
+            <!-- Documents Preview / Table Area -->
             <?php if (empty($records) && $totalRecords === 0): ?>
                 <!-- Empty State -->
                 <div class="portal-empty-state">
@@ -232,11 +328,137 @@ if ($search)         $baseParams['search']    = $search;
                         <line x1="16" y1="17" x2="8" y2="17"></line>
                     </svg>
                     <h3>No documents found</h3>
-                    <p>There are no documents matching your selection. Try clearing filters or searching for something else.</p>
+                    <p>There are no documents matching your selection. Try selecting another document type or clearing filters.</p>
                 </div>
             <?php else: ?>
-                <!-- Data Table -->
-                <div class="portal-table-wrapper">
+                
+                <!-- MOBILE VIEW: Dedicated Document Preview Card List -->
+                <div class="repo-mobile-results">
+                    <div class="repo-mobile-results-header">
+                        <div class="repo-mobile-results-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--portal-navy)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                            <span>Documents (<?= $totalRecords ?>)</span>
+                        </div>
+                        <div class="repo-mobile-search-bar">
+                            <input type="text" id="repoSearchMobile" placeholder="Search..." value="<?= htmlspecialchars($search) ?>" onkeydown="if(event.key==='Enter')applySearchMobile()">
+                            <button type="button" onclick="applySearchMobile()" aria-label="Search">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="repo-mobile-card-list">
+                        <?php foreach ($records as $row): 
+                            $isExternal = preg_match('/^https?:\/\//i', $row['file_path']);
+                            $pubUrl     = $isExternal ? $row['file_path'] : ltrim($row['file_path'], '/');
+
+                            $docTypeKey = strtolower($row['document_type'] ?? $row['category'] ?? 'others');
+                            $docTypeLabel = $validDocTypes[$docTypeKey] ?? ucfirst(str_replace('_', ' ', $docTypeKey));
+
+                            $fileTypeKey  = strtolower($row['file_type'] ?? 'others');
+                            $fileTypeMeta = $validFileTypes[$fileTypeKey] ?? $validFileTypes['others'];
+
+                            $ext = strtolower(pathinfo(parse_url($pubUrl, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
+                            $videoExts = ['mp4', 'webm', 'ogg', 'mov', 'mkv', 'avi', 'wmv', 'flv'];
+                            $audioExts = ['mp3', 'wav', 'aac', 'flac', 'm4a'];
+                            $imgExts   = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+                            $isVideo = in_array($ext, $videoExts);
+                            $isAudio = in_array($ext, $audioExts);
+                            $isImage = in_array($ext, $imgExts);
+
+                            $previewType = 'others';
+                            if ($fileTypeKey === 'pdf' || $ext === 'pdf') $previewType = 'pdf';
+                            elseif ($fileTypeKey === 'slides' || in_array($ext, ['ppt', 'pptx'])) $previewType = 'slides';
+                            elseif ($fileTypeKey === 'docs' || in_array($ext, ['doc', 'docx'])) $previewType = 'docs';
+                            elseif ($fileTypeKey === 'sheets' || in_array($ext, ['xls', 'xlsx', 'csv'])) $previewType = 'sheets';
+                            elseif ($fileTypeKey === 'folder' || strpos($pubUrl, 'folder') !== false) $previewType = 'folder';
+                            elseif ($isVideo) $previewType = 'video';
+                            elseif ($isAudio) $previewType = 'audio';
+                            elseif ($isImage) $previewType = 'image';
+                            else $previewType = 'link';
+                        ?>
+                            <div class="repo-mobile-doc-card">
+                                <div class="repo-doc-card-top">
+                                    <div class="repo-doc-icon-badge <?= $fileTypeMeta['class'] ?>">
+                                        <?= getFileBadgeIcon($fileTypeKey, 20) ?>
+                                    </div>
+                                    <div class="repo-doc-card-main">
+                                        <a href="javascript:void(0)" onclick="openMediaModal('<?= htmlspecialchars($pubUrl) ?>', '<?= htmlspecialchars(addslashes($row['title'])) ?>', '<?= $previewType ?>', '<?= htmlspecialchars(addslashes($docTypeLabel)) ?>', '<?= htmlspecialchars(addslashes($fileTypeMeta['label'])) ?>')" class="repo-doc-title">
+                                            <?= htmlspecialchars($row['title']) ?>
+                                        </a>
+                                        <div class="repo-doc-meta-row">
+                                            <span class="repo-doc-cat-tag"><?= htmlspecialchars($docTypeLabel) ?></span>
+                                            <span class="repo-doc-meta-dot">&bull;</span>
+                                            <span class="repo-doc-date"><?= date('M d, Y', strtotime($row['date_uploaded'])) ?></span>
+                                            <?php if ($row['file_size']): ?>
+                                                <span class="repo-doc-meta-dot">&bull;</span>
+                                                <span class="repo-doc-size"><?= formatFileSize($row['file_size']) ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <?php if ($row['description']): ?>
+                                    <p class="repo-doc-desc"><?= htmlspecialchars(mb_strimwidth($row['description'], 0, 110, '…')) ?></p>
+                                <?php endif; ?>
+
+                                <div class="repo-doc-card-actions">
+                                    <button type="button" class="repo-doc-action-btn preview" onclick="openMediaModal('<?= htmlspecialchars($pubUrl) ?>', '<?= htmlspecialchars(addslashes($row['title'])) ?>', '<?= $previewType ?>', '<?= htmlspecialchars(addslashes($docTypeLabel)) ?>', '<?= htmlspecialchars(addslashes($fileTypeMeta['label'])) ?>')">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                        <span>Preview</span>
+                                    </button>
+                                    <a href="<?= htmlspecialchars($pubUrl) ?>" class="repo-doc-action-btn download" target="_blank" <?= ($isExternal || $isVideo) ? '' : 'download' ?>>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <?php if ($isExternal): ?>
+                                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                                <polyline points="15 3 21 3 21 9"></polyline>
+                                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                                            <?php else: ?>
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                <polyline points="7 10 12 15 17 10"></polyline>
+                                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                                            <?php endif; ?>
+                                        </svg>
+                                        <span><?= $isExternal ? 'Open' : 'Download' ?></span>
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <!-- Mobile Pagination -->
+                    <?php if ($totalPages > 1): ?>
+                        <div class="portal-pagination" style="margin-top: 1rem;">
+                            <?php if ($page > 1): ?>
+                                <a href="?<?= http_build_query(array_merge($baseParams, ['sort' => $sortCol, 'dir' => strtolower($sortDir), 'page' => $page - 1])) ?>">&laquo;</a>
+                            <?php else: ?>
+                                <span class="disabled">&laquo;</span>
+                            <?php endif; ?>
+
+                            <?php
+                            $start = max(1, $page - 2);
+                            $end   = min($totalPages, $page + 2);
+                            for ($i = $start; $i <= $end; $i++):
+                            ?>
+                                <?php if ($i === $page): ?>
+                                    <span class="current"><?= $i ?></span>
+                                <?php else: ?>
+                                    <a href="?<?= http_build_query(array_merge($baseParams, ['sort' => $sortCol, 'dir' => strtolower($sortDir), 'page' => $i])) ?>"><?= $i ?></a>
+                                <?php endif; ?>
+                            <?php endfor; ?>
+
+                            <?php if ($page < $totalPages): ?>
+                                <a href="?<?= http_build_query(array_merge($baseParams, ['sort' => $sortCol, 'dir' => strtolower($sortDir), 'page' => $page + 1])) ?>">&raquo;</a>
+                            <?php else: ?>
+                                <span class="disabled">&raquo;</span>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- DESKTOP VIEW: Data Table -->
+                <div class="portal-table-wrapper repo-desktop-table">
                     <!-- Toolbar -->
                     <div class="portal-table-toolbar">
                         <div class="portal-search-box">
@@ -404,15 +626,43 @@ if ($search)         $baseParams['search']    = $search;
     </div>
 
     <script>
+        function handleFilterChange() {
+            const docType = document.getElementById('filterDocType').value;
+            const fileType = document.getElementById('filterFileType').value;
+            const searchInput = document.getElementById('repoSearchMobile') || document.getElementById('repoSearch');
+            const searchVal = searchInput ? searchInput.value.trim() : '';
+
+            const url = new URL(window.location.origin + window.location.pathname);
+            if (docType) url.searchParams.set('category', docType);
+            if (fileType) url.searchParams.set('file_type', fileType);
+            if (searchVal) url.searchParams.set('search', searchVal);
+
+            window.location.href = url.toString();
+        }
+
         function applySearch() {
             const val = document.getElementById('repoSearch').value.trim();
-            const url = new URL(window.location.href);
-            if (val) {
-                url.searchParams.set('search', val);
-            } else {
-                url.searchParams.delete('search');
-            }
-            url.searchParams.delete('page');
+            const docType = document.getElementById('filterDocType').value;
+            const fileType = document.getElementById('filterFileType').value;
+
+            const url = new URL(window.location.origin + window.location.pathname);
+            if (docType) url.searchParams.set('category', docType);
+            if (fileType) url.searchParams.set('file_type', fileType);
+            if (val) url.searchParams.set('search', val);
+
+            window.location.href = url.toString();
+        }
+
+        function applySearchMobile() {
+            const val = document.getElementById('repoSearchMobile').value.trim();
+            const docType = document.getElementById('filterDocType').value;
+            const fileType = document.getElementById('filterFileType').value;
+
+            const url = new URL(window.location.origin + window.location.pathname);
+            if (docType) url.searchParams.set('category', docType);
+            if (fileType) url.searchParams.set('file_type', fileType);
+            if (val) url.searchParams.set('search', val);
+
             window.location.href = url.toString();
         }
 
@@ -506,4 +756,3 @@ if ($search)         $baseParams['search']    = $search;
 
 </body>
 </html>
-

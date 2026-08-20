@@ -135,8 +135,8 @@ if ($search) $baseParams['search'] = $search;
                     <p>There are no office memorandums available yet. Check back later.</p>
                 </div>
             <?php else: ?>
-                <!-- Data Table -->
-                <div class="portal-table-wrapper">
+                <!-- DESKTOP VIEW: Data Table (>= 769px) -->
+                <div class="portal-table-wrapper memo-desktop-table">
                     <div class="portal-table-toolbar">
                         <div class="portal-search-box">
                             <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -201,7 +201,7 @@ if ($search) $baseParams['search'] = $search;
                                                 <a href="<?= htmlspecialchars($pubUrl) ?>" class="download-btn" target="_blank" <?= ($isExternal) ? '' : 'download' ?> title="<?= $isExternal ? 'Open Link' : 'Download File' ?>">
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                         <?php if ($isExternal): ?>
-                                                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                                             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                                             <polyline points="15 3 21 3 21 9"></polyline>
                                                             <line x1="10" y1="14" x2="21" y2="3"></line>
                                                         <?php else: ?>
@@ -229,9 +229,96 @@ if ($search) $baseParams['search'] = $search;
                         </tbody>
                     </table>
 
-                    <!-- Pagination -->
+                    <!-- Desktop Pagination -->
                     <?php if ($totalPages > 1): ?>
                         <div class="portal-pagination">
+                            <?php if ($page > 1): ?>
+                                <a href="?<?= http_build_query(array_merge($baseParams, ['sort' => $sortCol, 'dir' => strtolower($sortDir), 'page' => $page - 1])) ?>">&laquo;</a>
+                            <?php else: ?>
+                                <span class="disabled">&laquo;</span>
+                            <?php endif; ?>
+
+                            <?php
+                            $start = max(1, $page - 2);
+                            $end   = min($totalPages, $page + 2);
+                            for ($i = $start; $i <= $end; $i++):
+                            ?>
+                                <?php if ($i === $page): ?>
+                                    <span class="current"><?= $i ?></span>
+                                <?php else: ?>
+                                    <a href="?<?= http_build_query(array_merge($baseParams, ['sort' => $sortCol, 'dir' => strtolower($sortDir), 'page' => $i])) ?>"><?= $i ?></a>
+                                <?php endif; ?>
+                            <?php endfor; ?>
+
+                            <?php if ($page < $totalPages): ?>
+                                <a href="?<?= http_build_query(array_merge($baseParams, ['sort' => $sortCol, 'dir' => strtolower($sortDir), 'page' => $page + 1])) ?>">&raquo;</a>
+                            <?php else: ?>
+                                <span class="disabled">&raquo;</span>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- MOBILE VIEW: Stacked Cards (< 768px) -->
+                <div class="memo-mobile-results">
+                    <div class="memo-mobile-toolbar">
+                        <div class="portal-search-box memo-mobile-search">
+                            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+                            <input type="text" id="memoSearchMobile" placeholder="Search memorandums..." value="<?= htmlspecialchars($search) ?>" onkeydown="if(event.key==='Enter')applySearchMobile()">
+                        </div>
+
+                        <div class="memo-mobile-sub-toolbar">
+                            <div class="memo-mobile-count">
+                                Showing <?= $offset + 1 ?>–<?= min($offset + $limit, $totalRecords) ?> of <?= $totalRecords ?>
+                            </div>
+                            
+                            <div class="memo-sort-wrapper">
+                                <label for="memoSortSelect" class="memo-sort-label-sr">Sort by</label>
+                                <select id="memoSortSelect" class="memo-sort-select" onchange="handleSortChange(this.value)">
+                                    <option value="date_issued:desc" <?= ($sortCol === 'date_issued' && $sortDir === 'DESC') ? 'selected' : '' ?>>Date (Newest)</option>
+                                    <option value="date_issued:asc" <?= ($sortCol === 'date_issued' && $sortDir === 'ASC') ? 'selected' : '' ?>>Date (Oldest)</option>
+                                    <option value="memo_number:asc" <?= ($sortCol === 'memo_number' && $sortDir === 'ASC') ? 'selected' : '' ?>>Memo No.</option>
+                                    <option value="subject:asc" <?= ($sortCol === 'subject' && $sortDir === 'ASC') ? 'selected' : '' ?>>Subject</option>
+                                </select>
+                                <svg class="memo-sort-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="memo-mobile-card-list">
+                        <?php foreach ($records as $row): 
+                            $isEmpty = empty($row['file_path']);
+                            $isExternal = preg_match('/^https?:\/\//i', $row['file_path']);
+                            $pubUrl     = $isExternal ? $row['file_path'] : ltrim($row['file_path'], '/');
+                            $ext        = strtolower(pathinfo(parse_url($pubUrl, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
+                            
+                            $previewType = 'pdf';
+                            if ($isEmpty) $previewType = 'empty';
+                            elseif ($ext === 'pdf') $previewType = 'pdf';
+                            elseif (in_array($ext, ['ppt', 'pptx'])) $previewType = 'slides';
+                            elseif (in_array($ext, ['doc', 'docx'])) $previewType = 'docs';
+                            elseif (in_array($ext, ['xls', 'xlsx', 'csv'])) $previewType = 'sheets';
+                            elseif ($isExternal && strpos($pubUrl, 'folder') !== false) $previewType = 'folder';
+                            elseif ($isExternal) $previewType = 'link';
+                        ?>
+                            <div class="memo-mobile-card">
+                                <div class="memo-card-meta">
+                                    <span class="memo-card-no"><?= htmlspecialchars($row['memo_number']) ?></span>
+                                    <span class="memo-card-date"><?= date('M d', strtotime($row['date_issued'])) ?></span>
+                                </div>
+                                <a href="javascript:void(0)" onclick="openMediaModal('<?= htmlspecialchars($pubUrl) ?>', '<?= htmlspecialchars(addslashes($row['memo_number'] . ': ' . $row['subject'])) ?>', '<?= $previewType ?>', 'Memorandum')" class="memo-card-subject" title="Click to view memorandum">
+                                    <?= htmlspecialchars($row['subject']) ?>
+                                </a>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <!-- Mobile Pagination -->
+                    <?php if ($totalPages > 1): ?>
+                        <div class="portal-pagination" style="margin-top: 1.25rem;">
                             <?php if ($page > 1): ?>
                                 <a href="?<?= http_build_query(array_merge($baseParams, ['sort' => $sortCol, 'dir' => strtolower($sortDir), 'page' => $page - 1])) ?>">&laquo;</a>
                             <?php else: ?>
@@ -296,6 +383,32 @@ if ($search) $baseParams['search'] = $search;
                 url.searchParams.set('search', val);
             } else {
                 url.searchParams.delete('search');
+            }
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
+        }
+
+        function applySearchMobile() {
+            const val = document.getElementById('memoSearchMobile').value.trim();
+            const url = new URL(window.location.href);
+            if (val) {
+                url.searchParams.set('search', val);
+            } else {
+                url.searchParams.delete('search');
+            }
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
+        }
+
+        function handleSortChange(sortVal) {
+            if (!sortVal) return;
+            const parts = sortVal.split(':');
+            const url = new URL(window.location.href);
+            url.searchParams.set('sort', parts[0]);
+            if (parts[1]) {
+                url.searchParams.set('dir', parts[1]);
+            } else {
+                url.searchParams.delete('dir');
             }
             url.searchParams.delete('page');
             window.location.href = url.toString();
