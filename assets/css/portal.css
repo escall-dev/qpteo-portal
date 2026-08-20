@@ -928,7 +928,6 @@ body {
     font-size: 1.85rem;
     font-weight: 800;
     color: var(--portal-navy);
-    text-transform: uppercase;
     letter-spacing: 0.01em;
     margin-bottom: 0.75rem;
 }
@@ -1100,14 +1099,14 @@ body {
 }
 
 .coe-btn-social {
-    background: #000000;
-    color: #ffffff;
+    background: #edac36;
+    color: #040484;
 }
 
 .coe-btn-social:hover {
-    background: #262626;
-    color: #ffffff;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    background: #df9e25;
+    color: #040484;
+    box-shadow: 0 3px 10px rgba(237, 172, 54, 0.4);
 }
 
 /* ---------- Empty State ---------- */
