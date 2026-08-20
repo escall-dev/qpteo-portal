@@ -23,6 +23,8 @@ try {
 <link rel="stylesheet" href="<?= $rootPath ?>/assets/css/portal.css?v=<?= time() ?>">
 <!-- Dedicated Mobile Stylesheet -->
 <link rel="stylesheet" href="<?= $rootPath ?>/assets/mobile/mobile.css?v=<?= time() ?>">
+<!-- Portal Bottom Sheet Controller -->
+<script src="<?= $rootPath ?>/assets/js/portal-bottom-sheet.js?v=<?= time() ?>"></script>
 
 <header class="qpteo-navbar">
     <div class="qpteo-navbar-container">

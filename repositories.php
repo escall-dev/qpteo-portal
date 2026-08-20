@@ -256,58 +256,20 @@ if ($search)         $baseParams['search']    = $search;
                 <p class="portal-section-subtitle">Browse documents by type.</p>
             </div>
 
-            <!-- Single Row Dual-Dropdown Filter Bar -->
+            <!-- Single Row Dual-Dropdown Filter Bar with Custom Bottom Sheets -->
             <div class="repo-filter-row">
                 <div class="repo-select-wrapper">
-                    <label for="filterDocType" class="repo-select-label-sr">Document Type</label>
-                    <select id="filterDocType" class="repo-filter-select" onchange="handleFilterChange()">
-                        <option value="" <?= empty($category) ? 'selected' : '' ?>>Document Type (<?= $totalAllDocs ?>)</option>
-                        <?php if (!empty($activeDocTypes)): ?>
-                            <optgroup label="Available Documents">
-                                <?php foreach ($activeDocTypes as $key => $label): ?>
-                                    <option value="<?= htmlspecialchars($key) ?>" <?= $category === $key ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($label) ?> (<?= $docCounts[$key] ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            </optgroup>
-                        <?php endif; ?>
-                        <?php if (!empty($emptyDocTypes)): ?>
-                            <optgroup label="Other Categories">
-                                <?php foreach ($emptyDocTypes as $key => $label): ?>
-                                    <option value="<?= htmlspecialchars($key) ?>" <?= $category === $key ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($label) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </optgroup>
-                        <?php endif; ?>
-                    </select>
-                    <svg class="repo-select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    <button type="button" class="portal-picker-btn <?= $category ? 'is-active' : '' ?>" id="pickerBtnDocType" onclick="openBottomSheet('sheetDocType')" aria-haspopup="dialog" aria-expanded="false" aria-label="Select Document Type">
+                        <span class="portal-picker-label"><?= htmlspecialchars($categoryLabel ?: "Document Type ({$totalAllDocs})") ?></span>
+                        <svg class="portal-picker-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
                 </div>
 
                 <div class="repo-select-wrapper">
-                    <label for="filterFileType" class="repo-select-label-sr">File Format</label>
-                    <select id="filterFileType" class="repo-filter-select" onchange="handleFilterChange()">
-                        <option value="" <?= empty($fileTypeFilter) ? 'selected' : '' ?>>File Type (<?= $totalAllDocs ?>)</option>
-                        <?php if (!empty($activeFileTypes)): ?>
-                            <optgroup label="Available Formats">
-                                <?php foreach ($activeFileTypes as $fKey => $fMeta): ?>
-                                    <option value="<?= htmlspecialchars($fKey) ?>" <?= $fileTypeFilter === $fKey ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($fMeta['label']) ?> (<?= $fileTypeCounts[$fKey] ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            </optgroup>
-                        <?php endif; ?>
-                        <?php if (!empty($emptyFileTypes)): ?>
-                            <optgroup label="Other Formats">
-                                <?php foreach ($emptyFileTypes as $fKey => $fMeta): ?>
-                                    <option value="<?= htmlspecialchars($fKey) ?>" <?= $fileTypeFilter === $fKey ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($fMeta['label']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </optgroup>
-                        <?php endif; ?>
-                    </select>
-                    <svg class="repo-select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    <button type="button" class="portal-picker-btn <?= $fileTypeFilter ? 'is-active' : '' ?>" id="pickerBtnFileType" onclick="openBottomSheet('sheetFileType')" aria-haspopup="dialog" aria-expanded="false" aria-label="Select File Format">
+                        <span class="portal-picker-label"><?= htmlspecialchars($fileTypeInfo ? $fileTypeInfo['label'] : "File Type ({$totalAllDocs})") ?></span>
+                        <svg class="portal-picker-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
                 </div>
 
                 <?php if ($category || $fileTypeFilter): ?>
@@ -315,6 +277,146 @@ if ($search)         $baseParams['search']    = $search;
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </a>
                 <?php endif; ?>
+            </div>
+
+            <!-- Document Type Custom Bottom Sheet -->
+            <div class="portal-bottom-sheet" id="sheetDocType" role="dialog" aria-modal="true" aria-labelledby="sheetDocTypeTitle">
+                <div class="portal-sheet-backdrop" onclick="closeBottomSheet('sheetDocType')"></div>
+                <div class="portal-sheet-panel">
+                    <div class="portal-sheet-handle"></div>
+                    
+                    <div class="portal-sheet-header">
+                        <h3 class="portal-sheet-title" id="sheetDocTypeTitle">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                            Document Type
+                        </h3>
+                        <button type="button" class="portal-sheet-close" onclick="closeBottomSheet('sheetDocType')" aria-label="Close sheet">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+
+                    <div class="portal-sheet-search-wrap">
+                        <svg class="portal-sheet-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                        <input type="text" class="portal-sheet-search-input" placeholder="Search document types..." aria-label="Search document types">
+                        <button type="button" class="portal-sheet-search-clear" aria-label="Clear search">&times;</button>
+                    </div>
+
+                    <div class="portal-sheet-body">
+                        <!-- All Document Types Option -->
+                        <button type="button" class="portal-sheet-item <?= empty($category) ? 'is-selected' : '' ?>" onclick="selectDocType('')" data-label="All Document Types">
+                            <span class="portal-sheet-item-label">All Document Types</span>
+                            <span class="portal-sheet-item-meta">
+                                <span class="portal-sheet-pill"><?= $totalAllDocs ?></span>
+                                <svg class="portal-sheet-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </span>
+                        </button>
+
+                        <?php if (!empty($activeDocTypes)): ?>
+                            <div class="portal-sheet-group">
+                                <div class="portal-sheet-group-title">Available Documents</div>
+                                <?php foreach ($activeDocTypes as $key => $label): ?>
+                                    <button type="button" class="portal-sheet-item <?= $category === $key ? 'is-selected' : '' ?>" onclick="selectDocType('<?= htmlspecialchars($key) ?>')" data-label="<?= htmlspecialchars($label) ?>">
+                                        <span class="portal-sheet-item-label"><?= htmlspecialchars($label) ?></span>
+                                        <span class="portal-sheet-item-meta">
+                                            <span class="portal-sheet-pill"><?= $docCounts[$key] ?? 0 ?></span>
+                                            <svg class="portal-sheet-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        </span>
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($emptyDocTypes)): ?>
+                            <div class="portal-sheet-group">
+                                <div class="portal-sheet-group-title">Other Categories</div>
+                                <?php foreach ($emptyDocTypes as $key => $label): ?>
+                                    <button type="button" class="portal-sheet-item <?= $category === $key ? 'is-selected' : '' ?>" onclick="selectDocType('<?= htmlspecialchars($key) ?>')" data-label="<?= htmlspecialchars($label) ?>">
+                                        <span class="portal-sheet-item-label"><?= htmlspecialchars($label) ?></span>
+                                        <span class="portal-sheet-item-meta">
+                                            <span class="portal-sheet-pill">0</span>
+                                            <svg class="portal-sheet-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        </span>
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="portal-sheet-empty">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                            <p>No matching document types found</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Format Custom Bottom Sheet -->
+            <div class="portal-bottom-sheet" id="sheetFileType" role="dialog" aria-modal="true" aria-labelledby="sheetFileTypeTitle">
+                <div class="portal-sheet-backdrop" onclick="closeBottomSheet('sheetFileType')"></div>
+                <div class="portal-sheet-panel">
+                    <div class="portal-sheet-handle"></div>
+                    
+                    <div class="portal-sheet-header">
+                        <h3 class="portal-sheet-title" id="sheetFileTypeTitle">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                            File Format
+                        </h3>
+                        <button type="button" class="portal-sheet-close" onclick="closeBottomSheet('sheetFileType')" aria-label="Close sheet">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+
+                    <div class="portal-sheet-search-wrap">
+                        <svg class="portal-sheet-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                        <input type="text" class="portal-sheet-search-input" placeholder="Search file formats..." aria-label="Search file formats">
+                        <button type="button" class="portal-sheet-search-clear" aria-label="Clear search">&times;</button>
+                    </div>
+
+                    <div class="portal-sheet-body">
+                        <!-- All File Types Option -->
+                        <button type="button" class="portal-sheet-item <?= empty($fileTypeFilter) ? 'is-selected' : '' ?>" onclick="selectFileType('')" data-label="All File Formats">
+                            <span class="portal-sheet-item-label">All File Formats</span>
+                            <span class="portal-sheet-item-meta">
+                                <span class="portal-sheet-pill"><?= $totalAllDocs ?></span>
+                                <svg class="portal-sheet-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </span>
+                        </button>
+
+                        <?php if (!empty($activeFileTypes)): ?>
+                            <div class="portal-sheet-group">
+                                <div class="portal-sheet-group-title">Available Formats</div>
+                                <?php foreach ($activeFileTypes as $fKey => $fMeta): ?>
+                                    <button type="button" class="portal-sheet-item <?= $fileTypeFilter === $fKey ? 'is-selected' : '' ?>" onclick="selectFileType('<?= htmlspecialchars($fKey) ?>')" data-label="<?= htmlspecialchars($fMeta['label']) ?>">
+                                        <span class="portal-sheet-item-label"><?= htmlspecialchars($fMeta['label']) ?></span>
+                                        <span class="portal-sheet-item-meta">
+                                            <span class="portal-sheet-pill"><?= $fileTypeCounts[$fKey] ?? 0 ?></span>
+                                            <svg class="portal-sheet-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        </span>
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($emptyFileTypes)): ?>
+                            <div class="portal-sheet-group">
+                                <div class="portal-sheet-group-title">Other Formats</div>
+                                <?php foreach ($emptyFileTypes as $fKey => $fMeta): ?>
+                                    <button type="button" class="portal-sheet-item <?= $fileTypeFilter === $fKey ? 'is-selected' : '' ?>" onclick="selectFileType('<?= htmlspecialchars($fKey) ?>')" data-label="<?= htmlspecialchars($fMeta['label']) ?>">
+                                        <span class="portal-sheet-item-label"><?= htmlspecialchars($fMeta['label']) ?></span>
+                                        <span class="portal-sheet-item-meta">
+                                            <span class="portal-sheet-pill">0</span>
+                                            <svg class="portal-sheet-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        </span>
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="portal-sheet-empty">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                            <p>No matching file formats found</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Documents Preview / Table Area -->
@@ -626,15 +728,28 @@ if ($search)         $baseParams['search']    = $search;
     </div>
 
     <script>
-        function handleFilterChange() {
-            const docType = document.getElementById('filterDocType').value;
-            const fileType = document.getElementById('filterFileType').value;
+        let currentCategory = '<?= htmlspecialchars(addslashes($category)) ?>';
+        let currentFileType = '<?= htmlspecialchars(addslashes($fileTypeFilter)) ?>';
+
+        function selectDocType(docType) {
+            currentCategory = docType;
+            closeBottomSheet('sheetDocType');
+            navigateToFilters();
+        }
+
+        function selectFileType(fileType) {
+            currentFileType = fileType;
+            closeBottomSheet('sheetFileType');
+            navigateToFilters();
+        }
+
+        function navigateToFilters() {
             const searchInput = document.getElementById('repoSearchMobile') || document.getElementById('repoSearch');
             const searchVal = searchInput ? searchInput.value.trim() : '';
 
             const url = new URL(window.location.origin + window.location.pathname);
-            if (docType) url.searchParams.set('category', docType);
-            if (fileType) url.searchParams.set('file_type', fileType);
+            if (currentCategory) url.searchParams.set('category', currentCategory);
+            if (currentFileType) url.searchParams.set('file_type', currentFileType);
             if (searchVal) url.searchParams.set('search', searchVal);
 
             window.location.href = url.toString();
@@ -642,12 +757,9 @@ if ($search)         $baseParams['search']    = $search;
 
         function applySearch() {
             const val = document.getElementById('repoSearch').value.trim();
-            const docType = document.getElementById('filterDocType').value;
-            const fileType = document.getElementById('filterFileType').value;
-
             const url = new URL(window.location.origin + window.location.pathname);
-            if (docType) url.searchParams.set('category', docType);
-            if (fileType) url.searchParams.set('file_type', fileType);
+            if (currentCategory) url.searchParams.set('category', currentCategory);
+            if (currentFileType) url.searchParams.set('file_type', currentFileType);
             if (val) url.searchParams.set('search', val);
 
             window.location.href = url.toString();
@@ -655,12 +767,9 @@ if ($search)         $baseParams['search']    = $search;
 
         function applySearchMobile() {
             const val = document.getElementById('repoSearchMobile').value.trim();
-            const docType = document.getElementById('filterDocType').value;
-            const fileType = document.getElementById('filterFileType').value;
-
             const url = new URL(window.location.origin + window.location.pathname);
-            if (docType) url.searchParams.set('category', docType);
-            if (fileType) url.searchParams.set('file_type', fileType);
+            if (currentCategory) url.searchParams.set('category', currentCategory);
+            if (currentFileType) url.searchParams.set('file_type', currentFileType);
             if (val) url.searchParams.set('search', val);
 
             window.location.href = url.toString();

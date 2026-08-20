@@ -275,15 +275,50 @@ if ($search) $baseParams['search'] = $search;
                                 Showing <?= $offset + 1 ?>–<?= min($offset + $limit, $totalRecords) ?> of <?= $totalRecords ?>
                             </div>
                             
+                            <?php
+                            $currentSortKey = "{$sortCol}:" . strtolower($sortDir);
+                            $sortOptions = [
+                                'date_issued:desc' => 'Date (Newest)',
+                                'date_issued:asc'  => 'Date (Oldest)',
+                                'memo_number:asc'  => 'Memo No.',
+                                'subject:asc'      => 'Subject',
+                            ];
+                            $activeSortLabel = $sortOptions[$currentSortKey] ?? 'Date (Newest)';
+                            ?>
                             <div class="memo-sort-wrapper">
-                                <label for="memoSortSelect" class="memo-sort-label-sr">Sort by</label>
-                                <select id="memoSortSelect" class="memo-sort-select" onchange="handleSortChange(this.value)">
-                                    <option value="date_issued:desc" <?= ($sortCol === 'date_issued' && $sortDir === 'DESC') ? 'selected' : '' ?>>Date (Newest)</option>
-                                    <option value="date_issued:asc" <?= ($sortCol === 'date_issued' && $sortDir === 'ASC') ? 'selected' : '' ?>>Date (Oldest)</option>
-                                    <option value="memo_number:asc" <?= ($sortCol === 'memo_number' && $sortDir === 'ASC') ? 'selected' : '' ?>>Memo No.</option>
-                                    <option value="subject:asc" <?= ($sortCol === 'subject' && $sortDir === 'ASC') ? 'selected' : '' ?>>Subject</option>
-                                </select>
-                                <svg class="memo-sort-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                                <button type="button" class="portal-picker-btn memo-sort-btn" onclick="openBottomSheet('sheetMemoSort')" aria-label="Sort memorandums">
+                                    <span class="portal-picker-label"><?= htmlspecialchars($activeSortLabel) ?></span>
+                                    <svg class="portal-picker-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Memo Sort Custom Bottom Sheet -->
+                    <div class="portal-bottom-sheet" id="sheetMemoSort" role="dialog" aria-modal="true" aria-labelledby="sheetMemoSortTitle">
+                        <div class="portal-sheet-backdrop" onclick="closeBottomSheet('sheetMemoSort')"></div>
+                        <div class="portal-sheet-panel">
+                            <div class="portal-sheet-handle"></div>
+                            
+                            <div class="portal-sheet-header">
+                                <h3 class="portal-sheet-title" id="sheetMemoSortTitle">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+                                    Sort Memorandums
+                                </h3>
+                                <button type="button" class="portal-sheet-close" onclick="closeBottomSheet('sheetMemoSort')" aria-label="Close sheet">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </button>
+                            </div>
+
+                            <div class="portal-sheet-body">
+                                <?php foreach ($sortOptions as $sKey => $sLabel): ?>
+                                    <button type="button" class="portal-sheet-item <?= $currentSortKey === $sKey ? 'is-selected' : '' ?>" onclick="handleSortChange('<?= $sKey ?>')">
+                                        <span class="portal-sheet-item-label"><?= htmlspecialchars($sLabel) ?></span>
+                                        <span class="portal-sheet-item-meta">
+                                            <svg class="portal-sheet-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        </span>
+                                    </button>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     </div>

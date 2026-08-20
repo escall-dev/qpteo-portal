@@ -408,15 +408,16 @@
         gap: 0.45rem;
     }
 
-    .repo-filter-select {
-        padding: 0.45rem 1.7rem 0.45rem 0.65rem;
+    .repo-filter-select,
+    .portal-picker-btn {
+        padding: 0.45rem 0.65rem;
         font-size: 0.75rem;
         height: 38px;
         border-radius: 8px;
     }
 
-    .repo-select-chevron {
-        right: 0.55rem;
+    .repo-select-chevron,
+    .portal-picker-btn .portal-picker-chevron {
         width: 13px;
         height: 13px;
     }
