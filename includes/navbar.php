@@ -60,7 +60,6 @@ try {
                     <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6"/></svg>
                 </a>
                 <ul class="qpteo-dropdown-menu">
-                    <li><a href="https://dts.qpteo.com/index.php" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">Document Tracking System</a></li>
                     <li><a href="/landing/dls/pages/login.php" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">Document Library System</a></li>
                     <li><a href="https://oel.qpteo.com/login.php" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">Online Electronic Logbook</a></li>
                      <li><a href="https://qpteo.com/virtual-co-design-board/login.php" class="qpteo-dropdown-item" target="_blank" rel="noopener noreferrer">Virtual Co-Design Board</a></li>
@@ -99,9 +98,9 @@ try {
                 <ul class="qpteo-dropdown-menu">
                     <!-- Nested Dropdown for Minutes of the Meetings -->
                     <li class="has-nested-dropdown">
-                        <a href="#" class="qpteo-dropdown-item" onclick="return false;" style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="#" class="qpteo-dropdown-item qpteo-nested-toggle" onclick="return false;" style="display: flex; justify-content: space-between; align-items: center;">
                             Minutes of the Meetings
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-left: 0.5rem;"><path d="M9 18l6-6-6-6"/></svg>
+                            <svg class="nested-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-left: 0.5rem;"><path d="M9 18l6-6-6-6"/></svg>
                         </a>
                         <ul class="qpteo-nested-dropdown-menu">
                             <li><a href="<?= $rootPath ?>/repositories.php?category=qpteo_office_meetings" class="qpteo-dropdown-item">QPTEO Office Meetings</a></li>
@@ -196,9 +195,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 e.stopPropagation();
                 dropdownItems.forEach(other => {
-                    if (other !== item) other.classList.remove('open');
+                    if (other !== item) {
+                        other.classList.remove('open');
+                        other.querySelectorAll('.has-nested-dropdown').forEach(n => n.classList.remove('open'));
+                    }
                 });
                 item.classList.toggle('open');
+            }
+        });
+    });
+
+    // Toggle nested dropdowns on click (both desktop & mobile)
+    const nestedDropdowns = document.querySelectorAll('.has-nested-dropdown');
+    nestedDropdowns.forEach(nestedItem => {
+        const nestedToggle = nestedItem.querySelector('.qpteo-nested-toggle') || nestedItem.querySelector('a');
+        if (nestedToggle) {
+            nestedToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                nestedDropdowns.forEach(other => {
+                    if (other !== nestedItem) other.classList.remove('open');
+                });
+                nestedItem.classList.toggle('open');
+            });
+        }
+    });
+
+    // Reset open nested dropdown state when mouse leaves parent nav item on desktop
+    dropdownItems.forEach(item => {
+        item.addEventListener('mouseleave', function() {
+            if (window.innerWidth >= 992) {
+                item.querySelectorAll('.has-nested-dropdown').forEach(n => n.classList.remove('open'));
             }
         });
     });
@@ -368,6 +395,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Close dropdown when clicking outside
     document.addEventListener('click', function(e) {
         dropdownItems.forEach(item => item.classList.remove('open'));
+        nestedDropdowns.forEach(item => item.classList.remove('open'));
         if (navMenu) navMenu.classList.remove('mobile-open');
 
         const searchBox = document.querySelector('.qpteo-search-box');
