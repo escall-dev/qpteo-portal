@@ -92,8 +92,20 @@ $currentUrl = $stmt->fetchColumn() ?: '#';
                             <input type="text" id="meeting_recordings_url" name="meeting_recordings_url" class="form-control" value="<?= htmlspecialchars($currentUrl) ?>" required>
                         </div>
                         
-                        <button type="submit" class="btn-admin btn-admin-primary">Save Settings</button>
+                        <div style="margin-top:1.5rem">
+                            <button type="submit" class="btn-admin btn-admin-primary">Save Settings</button>
+                        </div>
                     </form>
+
+                    <hr style="margin:2rem 0;border:0;border-top:1px solid var(--admin-border)">
+
+                    <div style="display:flex;justify-content:space-between;align-items:center;background:#f8fafc;padding:1.25rem;border-radius:8px;border:1px solid var(--admin-border)">
+                        <div>
+                            <h3 style="font-size:1rem;font-weight:700;color:var(--admin-navy);margin-bottom:0.25rem">Centers of Excellence Content</h3>
+                            <p style="font-size:0.85rem;color:var(--admin-text-muted);margin:0">Customize National and Regional COEs overview paragraphs and priority challenges text.</p>
+                        </div>
+                        <a href="coes.php?action=content" class="btn-admin btn-admin-primary" style="background:#040484;white-space:nowrap">Manage COE Content &rarr;</a>
+                    </div>
                 </div>
             </div>
         </div>

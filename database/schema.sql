@@ -111,6 +111,7 @@ CREATE TABLE IF NOT EXISTS `memorandums` (
 CREATE TABLE IF NOT EXISTS `centers_of_excellence` (
     `id`               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `institution_name` VARCHAR(500) NOT NULL,
+    `category`         ENUM('national', 'regional') NOT NULL DEFAULT 'national',
     `region`           VARCHAR(100) NULL,
     `province`         VARCHAR(100) NULL,
     `address`          TEXT         NULL,
@@ -124,6 +125,7 @@ CREATE TABLE IF NOT EXISTS `centers_of_excellence` (
     `created_at`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
+    INDEX `idx_category` (`category`),
     INDEX `idx_region` (`region`),
     INDEX `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

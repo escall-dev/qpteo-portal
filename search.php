@@ -106,10 +106,10 @@ if ($query !== '') {
 
         // 3. COEs
         $coeStmt = $pdo->prepare("
-            SELECT id, institution_name, region, province, description 
+            SELECT id, institution_name, category, region, province, description 
             FROM centers_of_excellence 
             WHERE institution_name LIKE :q OR region LIKE :q OR province LIKE :q OR description LIKE :q 
-            ORDER BY region ASC
+            ORDER BY category ASC, region ASC
         ");
         $coeStmt->execute([':q' => $searchParam]);
         $results['coes'] = $coeStmt->fetchAll();
@@ -299,10 +299,19 @@ if ($query !== '') {
                         <h2 class="portal-search-group-title">Centers of Excellence (<?= count($results['coes']) ?>)</h2>
                         <div class="portal-search-grid">
                             <?php foreach ($results['coes'] as $coe): ?>
+                                <?php $catBadgeClass = ($coe['category'] ?? 'national') === 'regional' ? 'portal-badge-gold' : 'portal-badge-navy'; ?>
+                                <?php $catLabel = ($coe['category'] ?? 'national') === 'regional' ? 'Regional COE' : 'National COE'; ?>
                                 <div class="portal-search-card">
-                                    <span class="portal-badge portal-badge-gold"><?= htmlspecialchars($coe['region']) ?></span>
-                                    <h3 class="portal-search-card-title"><?= htmlspecialchars($coe['institution_name']) ?></h3>
-                                    <p class="portal-search-card-desc"><?= htmlspecialchars($coe['province'] ?? '') ?> — <?= htmlspecialchars($coe['description'] ?? '') ?></p>
+                                    <div style="display:flex;gap:0.35rem;flex-wrap:wrap;margin-bottom:0.35rem">
+                                        <span class="portal-badge <?= $catBadgeClass ?>"><?= htmlspecialchars($catLabel) ?></span>
+                                        <?php if (!empty($coe['region'])): ?>
+                                            <span class="portal-badge portal-badge-gold"><?= htmlspecialchars($coe['region']) ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <h3 class="portal-search-card-title">
+                                        <a href="coes.php?search=<?= urlencode($coe['institution_name']) ?>"><?= htmlspecialchars($coe['institution_name']) ?></a>
+                                    </h3>
+                                    <p class="portal-search-card-desc"><?= htmlspecialchars($coe['province'] ?? '') ?><?= !empty($coe['description']) ? ' — ' . htmlspecialchars($coe['description']) : '' ?></p>
                                     <a href="coes.php?search=<?= urlencode($coe['institution_name']) ?>" class="portal-btn portal-btn-sm portal-btn-outline" style="margin-top: 0.5rem;">View Institution &rarr;</a>
                                 </div>
                             <?php endforeach; ?>

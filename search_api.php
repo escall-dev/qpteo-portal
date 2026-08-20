@@ -154,18 +154,20 @@ try {
 
     // 5. Centers of Excellence Search
     $coeStmt = $pdo->prepare("
-        SELECT id, institution_name, region, province, description 
+        SELECT id, institution_name, category, region, province, description 
         FROM centers_of_excellence 
         WHERE institution_name LIKE :q OR region LIKE :q OR province LIKE :q OR description LIKE :q 
-        ORDER BY region ASC 
+        ORDER BY category ASC, region ASC 
         LIMIT 6
     ");
     $coeStmt->execute([':q' => $searchParam]);
     $coes = $coeStmt->fetchAll();
     foreach ($coes as $c) {
+        $catLabel = ($c['category'] ?? 'national') === 'regional' ? 'Regional COE' : 'National COE';
         $results['coes'][] = [
             'id'          => $c['id'],
             'title'       => $c['institution_name'],
+            'category'    => $catLabel,
             'region'      => $c['region'],
             'province'    => $c['province'],
             'description' => $c['description'] ?? '',
