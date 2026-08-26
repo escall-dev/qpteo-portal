@@ -94,13 +94,12 @@ body {
 
 /* Nav Menu Links - Centered in Middle of Navbar */
 .qpteo-nav-menu {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    flex: 1;
+    justify-content: center;
     display: flex;
     align-items: center;
     list-style: none;
-    margin: 0;
+    margin: 0 1rem;
     padding: 0;
     gap: 0.25rem;
 }
