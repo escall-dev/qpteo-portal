@@ -181,7 +181,7 @@ function formatFileSize($bytes) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memorandums — QPTEO Admin</title>
-    <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="stylesheet" href="assets/css/admin.css?v=<?= time() ?>">
 </head>
 <body>
 

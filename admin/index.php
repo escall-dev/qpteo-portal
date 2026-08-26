@@ -19,7 +19,7 @@ try {
     $stmt = $pdo->prepare("SELECT id FROM admin_users WHERE username = 'alex'");
     $stmt->execute();
     if (!$stmt->fetch()) {
-        $stmt = $pdo->prepare("INSERT INTO admin_users (username, password) VALUES ('alex', ?)");
+        $stmt = $pdo->prepare("INSERT INTO admin_users (username, password, role) VALUES ('alex', ?, 'superadmin')");
         $stmt->execute([password_hash('escall', PASSWORD_DEFAULT)]);
     }
 } catch (Exception $e) {
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         try {
             $pdo = getPortalDB();
-            $stmt = $pdo->prepare("SELECT id, username, password FROM admin_users WHERE username = :username LIMIT 1");
+            $stmt = $pdo->prepare("SELECT id, username, password, role FROM admin_users WHERE username = :username LIMIT 1");
             $stmt->execute([':username' => $username]);
             $user = $stmt->fetch();
 
@@ -46,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['admin_logged_in']  = true;
                 $_SESSION['admin_user_id']    = $user['id'];
                 $_SESSION['admin_username']   = $user['username'];
+                $_SESSION['admin_role']       = $user['role'];
                 $_SESSION['admin_last_regen'] = time();
                 header('Location: dashboard.php');
                 exit;
@@ -68,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="stylesheet" href="assets/css/admin.css?v=<?= time() ?>">
 </head>
 <body class="admin-login-page">
 

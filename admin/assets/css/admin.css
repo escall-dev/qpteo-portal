@@ -6,8 +6,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    --admin-sidebar-bg:     #0a0a2e;
-    --admin-sidebar-hover:  #14143f;
+    --admin-sidebar-bg:     #040484;
+    --admin-sidebar-hover:  #040484;
     --admin-sidebar-active: #040484;
     --admin-sidebar-width:  260px;
     --admin-gold:           #edac36;
@@ -454,6 +454,7 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
     z-index: 2000;
     justify-content: center;
     align-items: center;
